@@ -5,9 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"mime"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"os/exec"
@@ -27,6 +25,7 @@ import (
 	"github.com/disintegration/imaging"
 	fiberUtils "github.com/gofiber/fiber/v2/utils"
 	"github.com/sirupsen/logrus"
+	"github.com/valyala/fasthttp"
 	"go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/types"
@@ -43,21 +42,6 @@ func NewSendService(appService app.IAppUsecase, chatStorageRepo domainChatStorag
 		appService:      appService,
 		chatStorageRepo: chatStorageRepo,
 	}
-}
-
-// saveMultipartFile saves a multipart.File to a local file path
-// Replacement for fasthttp.SaveMultipartFile to avoid Go 1.24 requirement
-func saveMultipartFile(f *multipart.File, dst string) error {
-	// Create the destination file
-	dstFile, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer dstFile.Close()
-
-	// Copy the uploaded file to the destination
-	_, err = io.Copy(dstFile, *f)
-	return err
 }
 
 // wrapSendMessage wraps the message sending process with message ID saving
@@ -244,7 +228,7 @@ func (service serviceSend) SendImage(ctx context.Context, request domainSend.Ima
 	} else if request.Image != nil {
 		// Save image to server
 		oriImagePath = fmt.Sprintf("%s/%s", config.PathSendItems, request.Image.Filename)
-		err = saveMultipartFile(&request.Image, oriImagePath)
+		err = fasthttp.SaveMultipartFile(request.Image, oriImagePath)
 		if err != nil {
 			return response, err
 		}
@@ -466,7 +450,7 @@ func (service serviceSend) SendVideo(ctx context.Context, request domainSend.Vid
 	} else if request.Video != nil {
 		// Save uploaded video to server
 		oriVideoPath = fmt.Sprintf("%s/%s", config.PathSendItems, generateUUID+request.Video.Filename)
-		err = saveMultipartFile(&request.Video, oriVideoPath)
+		err = fasthttp.SaveMultipartFile(request.Video, oriVideoPath)
 		if err != nil {
 			return response, pkgError.InternalServerError(fmt.Sprintf("failed to store video in server %v", err))
 		}
@@ -994,7 +978,7 @@ func (service serviceSend) SendSticker(ctx context.Context, request domainSend.S
 		_ = f.Close()
 
 		// Save uploaded file to safe path
-		err = saveMultipartFile(&request.Sticker, stickerPath)
+		err = fasthttp.SaveMultipartFile(request.Sticker, stickerPath)
 		if err != nil {
 			return response, pkgError.InternalServerError(fmt.Sprintf("failed to save sticker: %v", err))
 		}
