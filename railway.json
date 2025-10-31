@@ -1,12 +1,10 @@
 {
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "cd src && go build -o whatsapp",
-    "watchPatterns": ["src/**"]
+    "buildCommand": "cd src && go build -o whatsapp"
   },
   "deploy": {
-    "numReplicas": 1,
-    "sleepApplication": false,
+    "startCommand": "cd src && ./whatsapp rest",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
