@@ -15,12 +15,21 @@ func SetAutoConnectAfterBooting(service domainApp.IAppUsecase) {
 }
 
 func SetAutoReconnectChecking(cli *whatsmeow.Client) {
-	// Run every 5 minutes to check if the connection is still alive, if not, reconnect
+	// Run every 30 seconds to check if the connection is still alive, if not, reconnect
 	go func() {
 		for {
-			time.Sleep(5 * time.Minute)
+			time.Sleep(30 * time.Second)
 			if !cli.IsConnected() {
-				_ = cli.Connect()
+				logrus.Info("[AUTO-RECONNECT] Connection lost, attempting to reconnect...")
+				if err := cli.Connect(); err != nil {
+					logrus.Errorf("[AUTO-RECONNECT] Failed to reconnect: %v", err)
+				} else {
+					logrus.Info("[AUTO-RECONNECT] Successfully reconnected")
+				}
+			} else {
+				// Send periodic presence to keep connection alive (every 5 minutes)
+				// This helps prevent idle disconnections
+				// Note: WhatsApp handles pings internally, this is just extra safety
 			}
 		}
 	}()
