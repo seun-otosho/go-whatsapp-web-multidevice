@@ -7,7 +7,7 @@ services:
         max-file: "10"
     build:
       context: .
-      dockerfile: ./docker/golang.Dockerfile
+      dockerfile: Dockerfile
     restart: "on-failure"
     ports:
       - "3000:3000"
