@@ -241,12 +241,7 @@ func ExtractMessageTextFromEvent(evt *events.Message) string {
 			messageText = "📊 " + messageText
 		}
 	} else if pollMessageV5 := evt.Message.GetPollCreationMessageV5(); pollMessageV5 != nil {
-		messageText = pollMessageV5.GetName()
-		if messageText == "" {
-			messageText = "📊 Poll"
-		} else {
-			messageText = "📊 " + messageText
-		}
+		messageText = "📊 Poll"
 	}
 	return messageText
 }

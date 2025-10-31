@@ -142,11 +142,11 @@ func InitWaCLI(ctx context.Context, storeContainer, keysStoreContainer *sqlstore
 
 	cli.AddEventHandler(func(rawEvt interface{}) {
 		// Log connection state changes
-		switch evt := rawEvt.(type) {
+		switch rawEvt.(type) {
 		case *events.Disconnected:
-			log.Warnf("[CONNECTION] Client disconnected: %v", evt.Reason)
+			log.Debugf("[CONNECTION] Client disconnected")
 		case *events.Connected:
-			log.Info("[CONNECTION] Client connected successfully")
+			log.Debugf("[CONNECTION] Client connected successfully")
 		}
 		handler(ctx, rawEvt, chatStorageRepo)
 	})

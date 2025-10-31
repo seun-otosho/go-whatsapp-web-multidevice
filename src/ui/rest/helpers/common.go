@@ -5,6 +5,7 @@ import (
 	"mime/multipart"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	domainApp "github.com/aldinokemal/go-whatsapp-web-multidevice/domains/app"
 	"go.mau.fi/whatsmeow"
 )
